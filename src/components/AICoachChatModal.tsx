@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useWorkout } from '../context/WorkoutContext';
 import { aiCoachAgent, ChatMessage } from '../services/aiCoachAgent';
-import { Sparkles, X, Send } from 'lucide-react';
+import { Sparkles, X, Send, Key, Check, ExternalLink } from 'lucide-react';
 
 interface AICoachChatModalProps {
   isOpen: boolean;
@@ -19,6 +19,11 @@ const QUICK_CHIPS = [
 export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onClose }) => {
   const { activeProfile, activeWorkout, workoutHistory, routines, exercises, stats } = useWorkout();
   
+  const [apiKey, setApiKey] = useState(aiCoachAgent.getApiKey());
+  const [showKeySettings, setShowKeySettings] = useState(false);
+  const [inputKey, setInputKey] = useState(apiKey);
+  const [keySavedMessage, setKeySavedMessage] = useState(false);
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
@@ -46,6 +51,17 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
 
   if (!isOpen) return null;
 
+  const handleSaveKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    aiCoachAgent.setApiKey(inputKey);
+    setApiKey(inputKey.trim());
+    setKeySavedMessage(true);
+    setTimeout(() => {
+      setKeySavedMessage(false);
+      setShowKeySettings(false);
+    }, 1500);
+  };
+
   const handleSend = async (textToSend?: string) => {
     const message = (textToSend || inputText).trim();
     if (!message || isTyping) return;
@@ -68,7 +84,8 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
         workoutHistory,
         routines,
         exercises,
-        stats
+        stats,
+        chatHistory: messages
       });
 
       const assistantMsg: ChatMessage = {
@@ -98,18 +115,17 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
     <div 
       className="fixed inset-0 z-[100] bg-black/80 flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={(e) => {
-        // Cerrar tocando el fondo exterior
         if (e.target === e.currentTarget) {
           onClose();
         }
       }}
     >
       <div 
-        className="w-full max-w-lg bg-[#141416] border-t sm:border border-white/10 rounded-t-3xl sm:rounded-3xl flex flex-col h-[82vh] max-h-[90dvh] sm:h-[620px] shadow-2xl overflow-hidden relative z-[101]"
+        className="w-full max-w-lg bg-[#141416] border-t sm:border border-white/10 rounded-t-3xl sm:rounded-3xl flex flex-col h-[85vh] max-h-[90dvh] sm:h-[620px] shadow-2xl overflow-hidden relative z-[101]"
         style={{ touchAction: 'pan-y' }}
       >
         
-        {/* Grab Handle para deslizar o cerrar */}
+        {/* Grab Handle */}
         <div className="w-full pt-2.5 pb-1 flex justify-center cursor-pointer" onClick={onClose}>
           <div className="w-12 h-1 bg-white/20 hover:bg-white/40 rounded-full transition" />
         </div>
@@ -126,26 +142,98 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-black text-white">Coach Virtual IA</h3>
-                <span className="text-[9px] uppercase font-black px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  En vivo
-                </span>
+                {apiKey ? (
+                  <span className="text-[9px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                    <Sparkles className="w-2.5 h-2.5" /> Gemini Flash
+                  </span>
+                ) : (
+                  <span className="text-[9px] uppercase font-black px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                    Coach Activo
+                  </span>
+                )}
               </div>
-              <p className="text-[11px] text-slate-400 truncate max-w-[200px]">
-                {activeWorkout ? '⚡ ' + activeWorkout.routineName : 'Asesor de sobrecarga y técnica'}
+              <p className="text-[11px] text-slate-400 truncate max-w-[190px]">
+                {activeWorkout ? '⚡ ' + activeWorkout.routineName : 'Asesor en tiempo real'}
               </p>
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white transition"
-            aria-label="Cerrar"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowKeySettings(!showKeySettings)}
+              className={'w-8 h-8 rounded-full flex items-center justify-center transition text-xs ' + 
+                (apiKey ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/10 text-slate-300 hover:text-white')}
+              title="Configurar Gemini API"
+            >
+              <Key className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white transition"
+              aria-label="Cerrar"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Message Area con scroll táctil sin barra fea */}
+        {/* Panel de Configuración Gemini (Desplegable) */}
+        {showKeySettings && (
+          <div className="p-3.5 bg-[#18181C] border-b border-white/10 animate-fadeIn text-xs space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="font-black text-white flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5 text-cyan-400" /> Conectar Gemini AI (Opcional & Gratis)
+              </span>
+              <button onClick={() => setShowKeySettings(false)} className="text-slate-400 hover:text-white">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              Si quieres que el chatbot funcione con el modelo de lenguaje de Google Gemini Flash al 100%, puedes pegar tu API Key gratuita aquí:
+            </p>
+            <form onSubmit={handleSaveKey} className="flex gap-2">
+              <input
+                type="password"
+                placeholder="AIzaSy..."
+                value={inputKey}
+                onChange={e => setInputKey(e.target.value)}
+                className="flex-1 bg-[#101012] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+              />
+              <button
+                type="submit"
+                className="px-3.5 py-2 rounded-xl bg-cyan-400 text-black font-black text-xs hover:bg-cyan-300 transition"
+              >
+                {keySavedMessage ? '¡Guardada!' : 'Guardar'}
+              </button>
+            </form>
+            <div className="flex items-center justify-between text-[10px] text-slate-400">
+              <a 
+                href="https://aistudio.google.com/apikey" 
+                target="_blank" 
+                rel="noreferrer"
+                className="text-cyan-400 hover:underline flex items-center gap-1"
+              >
+                Obtener API Key gratis en Google AI Studio <ExternalLink className="w-2.5 h-2.5" />
+              </a>
+              {apiKey && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    aiCoachAgent.setApiKey('');
+                    setApiKey('');
+                    setInputKey('');
+                  }}
+                  className="text-red-400 hover:underline"
+                >
+                  Quitar clave
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Message Area */}
         <div 
           ref={scrollContainerRef}
           className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0E0E10] no-scrollbar"
@@ -189,9 +277,9 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
           )}
         </div>
 
-        {/* Quick Suggestion Chips (limpio, sin scrollbar track) */}
+        {/* Quick Suggestion Chips */}
         <div 
-          className="px-3 py-2.5 bg-[#141416] border-t border-white/5 overflow-x-auto no-scrollbar flex gap-2 shrink-0"
+          className="px-3 py-2 bg-[#141416] border-t border-white/5 overflow-x-auto no-scrollbar flex gap-2 shrink-0"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {QUICK_CHIPS.map((chip, idx) => (
@@ -206,7 +294,7 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
           ))}
         </div>
 
-        {/* Input Bar 100% visible, bien acolchada sobre safe-area */}
+        {/* Input Bar */}
         <div className="p-3 bg-[#1A1A1E] border-t border-white/10 pb-[max(18px,env(safe-area-inset-bottom,18px))] shrink-0">
           <form
             onSubmit={(e) => {
