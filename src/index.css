@@ -4,18 +4,16 @@
   html {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
-    user-select: none;
   }
   
   body {
     background-color: #09090B;
     color: #FFFFFF;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-    overscroll-behavior-y: none;
   }
 
   input, textarea, select {
-    user-select: auto;
+    font-size: 16px; /* Previene auto-zoom forzado en iPhone Safari */
   }
 }
 
