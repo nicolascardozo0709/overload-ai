@@ -1,4 +1,4 @@
-import { Exercise } from '../types';
+import { Exercise, Routine } from '../types';
 
 export const INITIAL_EXERCISES: Exercise[] = [
   // ===================== PECHO =====================
@@ -89,6 +89,17 @@ export const INITIAL_EXERCISES: Exercise[] = [
     tips: 'Excelente para llevar las series al fallo muscular de forma segura sin spotter.',
     defaultRepsMin: 8,
     defaultRepsMax: 12
+  },
+  {
+    id: 'ex-pecho-09',
+    name: 'Peck Deck (Aperturas en máquina)',
+    category: 'Pecho',
+    equipment: 'Máquina',
+    targetMuscle: 'Pectoral mayor (aislamiento y congestión)',
+    secondaryMuscles: ['Deltoides anterior'],
+    tips: 'Codos ligeramente flexionados, aprieta 1 segundo en el centro y controla el estiramiento.',
+    defaultRepsMin: 12,
+    defaultRepsMax: 15
   },
 
   // ===================== ESPALDA =====================
@@ -259,6 +270,61 @@ export const INITIAL_EXERCISES: Exercise[] = [
     defaultRepsMin: 12,
     defaultRepsMax: 20
   },
+  {
+    id: 'ex-pier-09',
+    name: 'Sentadilla Hack (o Prensa Inclinada 45°)',
+    category: 'Cuádriceps',
+    equipment: 'Máquina',
+    targetMuscle: 'Cuádriceps',
+    secondaryMuscles: ['Glúteos'],
+    tips: 'Pies al ancho de hombros en plataforma media-baja. Baja profundo controlando 3s.',
+    defaultRepsMin: 8,
+    defaultRepsMax: 10
+  },
+  {
+    id: 'ex-pier-10',
+    name: 'Zancadas Caminando o en Multipower',
+    category: 'Cuádriceps',
+    equipment: 'Barra',
+    targetMuscle: 'Cuádriceps y Glúteo medio (unilateral)',
+    secondaryMuscles: ['Isquiotibiales', 'Core'],
+    tips: 'Paso firme y controlado, rodilla trasera rozando el suelo, estabilidad pélvica.',
+    defaultRepsMin: 10,
+    defaultRepsMax: 10
+  },
+  {
+    id: 'ex-pier-11',
+    name: 'Sentadilla Goblet (talones elevados)',
+    category: 'Cuádriceps',
+    equipment: 'Mancuerna',
+    targetMuscle: 'Cuádriceps',
+    secondaryMuscles: ['Glúteos', 'Core'],
+    tips: 'Mancuerna vertical al pecho, talones elevados 1-2 cm para máxima profundidad y aislar cuádriceps.',
+    defaultRepsMin: 10,
+    defaultRepsMax: 12
+  },
+  {
+    id: 'ex-pier-12',
+    name: 'Zancadas Hacia Atrás (Reverse Lunges)',
+    category: 'Cuádriceps',
+    equipment: 'Mancuerna',
+    targetMuscle: 'Cuádriceps y Glúteo',
+    secondaryMuscles: ['Isquiosurales'],
+    tips: 'Paso atrás controlado para proteger la rótula y mantener la cadera perfectamente alineada.',
+    defaultRepsMin: 10,
+    defaultRepsMax: 10
+  },
+  {
+    id: 'ex-pier-13',
+    name: 'Elevación de Talones Unilateral (Gemelos)',
+    category: 'Isquios y Glúteo',
+    equipment: 'Mancuerna',
+    targetMuscle: 'Gastrocnemio y tendón de Aquiles',
+    secondaryMuscles: ['Sóleo'],
+    tips: 'Punta en escalón o disco, mancuerna en la misma mano, 2s de pausa abajo y sube explosivo.',
+    defaultRepsMin: 12,
+    defaultRepsMax: 15
+  },
 
   // ===================== HOMBROS =====================
   {
@@ -373,6 +439,17 @@ export const INITIAL_EXERCISES: Exercise[] = [
     defaultRepsMin: 10,
     defaultRepsMax: 12
   },
+  {
+    id: 'ex-bic-05',
+    name: 'Bayesian Curl en Polea',
+    category: 'Bíceps',
+    equipment: 'Polea',
+    targetMuscle: 'Bíceps braquial (cabeza larga en estiramiento)',
+    secondaryMuscles: ['Braquial'],
+    tips: 'De espaldas a la polea, brazo retrasado, siente el estiramiento extremo del bíceps.',
+    defaultRepsMin: 10,
+    defaultRepsMax: 12
+  },
 
   // ===================== TRÍCEPS =====================
   {
@@ -418,6 +495,28 @@ export const INITIAL_EXERCISES: Exercise[] = [
     tips: 'Manos a la anchura de hombros (no demasiado juntas para cuidar las muñecas).',
     defaultRepsMin: 6,
     defaultRepsMax: 10
+  },
+  {
+    id: 'ex-tri-05',
+    name: 'Fondos en Máquina (Dips)',
+    category: 'Tríceps',
+    equipment: 'Máquina',
+    targetMuscle: 'Tríceps y Deltoides anterior',
+    secondaryMuscles: ['Pectoral'],
+    tips: 'Torso erguido para enfatizar tríceps, empuja firme hacia abajo.',
+    defaultRepsMin: 8,
+    defaultRepsMax: 10
+  },
+  {
+    id: 'ex-tri-06',
+    name: 'Extensión de Tríceps Overhead en Polea',
+    category: 'Tríceps',
+    equipment: 'Polea',
+    targetMuscle: 'Tríceps (cabeza larga en estiramiento overhead)',
+    secondaryMuscles: [],
+    tips: 'De espaldas a la polea con cuerda sobre la cabeza, extiende hacia el frente.',
+    defaultRepsMin: 10,
+    defaultRepsMax: 12
   },
 
   // ===================== CORE Y ABDOMEN =====================
@@ -467,4 +566,71 @@ export const INITIAL_EXERCISES: Exercise[] = [
   }
 ];
 
-export const INITIAL_ROUTINES: Routine[] = [];
+export const INITIAL_ROUTINES: Routine[] = [
+  {
+    id: 'routine-pecho-espalda',
+    name: 'Pecho y Espalda',
+    description: 'Empuje y Tracción torácica • 18 series',
+    iconName: 'Flame',
+    color: '#00F0FF',
+    createdAt: '2026-09-14T12:00:00.000Z',
+    exercises: [
+      { exerciseId: 'ex-pecho-03', targetSets: 3, targetRepsMin: 8, targetRepsMax: 10, restSeconds: 90 },
+      { exerciseId: 'ex-pecho-02', targetSets: 3, targetRepsMin: 8, targetRepsMax: 10, restSeconds: 90 },
+      { exerciseId: 'ex-pecho-09', targetSets: 3, targetRepsMin: 12, targetRepsMax: 15, restSeconds: 60 },
+      { exerciseId: 'ex-esp-04', targetSets: 3, targetRepsMin: 8, targetRepsMax: 10, restSeconds: 90 },
+      { exerciseId: 'ex-esp-02', targetSets: 3, targetRepsMin: 10, targetRepsMax: 12, restSeconds: 75 },
+      { exerciseId: 'ex-esp-07', targetSets: 3, targetRepsMin: 12, targetRepsMax: 15, restSeconds: 60 }
+    ]
+  },
+  {
+    id: 'routine-brazo-hombro',
+    name: 'Brazo y Hombro',
+    description: 'Deltoides, Bíceps y Tríceps • 21 series',
+    iconName: 'Dumbbell',
+    color: '#AF52DE',
+    createdAt: '2026-09-14T12:00:00.000Z',
+    exercises: [
+      { exerciseId: 'ex-hom-03', targetSets: 5, targetRepsMin: 12, targetRepsMax: 15, restSeconds: 60 },
+      { exerciseId: 'ex-hom-01', targetSets: 2, targetRepsMin: 6, targetRepsMax: 8, restSeconds: 90 },
+      { exerciseId: 'ex-hom-05', targetSets: 2, targetRepsMin: 12, targetRepsMax: 15, restSeconds: 60 },
+      { exerciseId: 'ex-tri-05', targetSets: 2, targetRepsMin: 8, targetRepsMax: 10, restSeconds: 75 },
+      { exerciseId: 'ex-bic-05', targetSets: 2, targetRepsMin: 10, targetRepsMax: 12, restSeconds: 60 },
+      { exerciseId: 'ex-tri-06', targetSets: 2, targetRepsMin: 10, targetRepsMax: 12, restSeconds: 60 },
+      { exerciseId: 'ex-bic-04', targetSets: 2, targetRepsMin: 8, targetRepsMax: 10, restSeconds: 60 },
+      { exerciseId: 'ex-tri-01', targetSets: 2, targetRepsMin: 12, targetRepsMax: 15, restSeconds: 60 },
+      { exerciseId: 'ex-bic-03', targetSets: 2, targetRepsMin: 10, targetRepsMax: 12, restSeconds: 60 }
+    ]
+  },
+  {
+    id: 'routine-pierna-gym',
+    name: 'Pierna (Gimnasio Completo)',
+    description: 'Enfoque Atleta Híbrido & 21K • 19 series',
+    iconName: 'TrendingUp',
+    color: '#FF9500',
+    createdAt: '2026-09-14T12:00:00.000Z',
+    exercises: [
+      { exerciseId: 'ex-pier-09', targetSets: 3, targetRepsMin: 8, targetRepsMax: 10, restSeconds: 90 },
+      { exerciseId: 'ex-pier-05', targetSets: 3, targetRepsMin: 8, targetRepsMax: 10, restSeconds: 90 },
+      { exerciseId: 'ex-pier-04', targetSets: 3, targetRepsMin: 12, targetRepsMax: 15, restSeconds: 60 },
+      { exerciseId: 'ex-pier-06', targetSets: 3, targetRepsMin: 10, targetRepsMax: 12, restSeconds: 75 },
+      { exerciseId: 'ex-pier-10', targetSets: 3, targetRepsMin: 10, targetRepsMax: 10, restSeconds: 75 },
+      { exerciseId: 'ex-pier-08', targetSets: 4, targetRepsMin: 12, targetRepsMax: 15, restSeconds: 60 }
+    ]
+  },
+  {
+    id: 'routine-pierna-mancuernas',
+    name: 'Pierna (Solo Mancuernas)',
+    description: 'Minimalista en casa o viaje • 16 series',
+    iconName: 'Zap',
+    color: '#30D158',
+    createdAt: '2026-09-14T12:00:00.000Z',
+    exercises: [
+      { exerciseId: 'ex-pier-03', targetSets: 3, targetRepsMin: 8, targetRepsMax: 10, restSeconds: 75 },
+      { exerciseId: 'ex-pier-05', targetSets: 3, targetRepsMin: 10, targetRepsMax: 12, restSeconds: 75 },
+      { exerciseId: 'ex-pier-11', targetSets: 3, targetRepsMin: 10, targetRepsMax: 12, restSeconds: 75 },
+      { exerciseId: 'ex-pier-12', targetSets: 3, targetRepsMin: 10, targetRepsMax: 10, restSeconds: 60 },
+      { exerciseId: 'ex-pier-13', targetSets: 4, targetRepsMin: 12, targetRepsMax: 15, restSeconds: 60 }
+    ]
+  }
+];

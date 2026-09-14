@@ -1,11 +1,11 @@
 import { Exercise, Routine, WorkoutSession, UserStats, UserProfile } from '../types';
-import { INITIAL_EXERCISES } from '../data/exercisesDatabase';
+import { INITIAL_EXERCISES, INITIAL_ROUTINES } from '../data/exercisesDatabase';
 
 const STORAGE_KEYS = {
   PROFILES: 'overload_ai_profiles_v2',
   ACTIVE_PROFILE_ID: 'overload_ai_active_profile_id_v2',
-  EXERCISES: 'overload_ai_exercises_v2',
-  ROUTINES_PREFIX: 'overload_ai_routines_v2_',
+  EXERCISES: 'overload_ai_exercises_v3',
+  ROUTINES_PREFIX: 'overload_ai_routines_v3_',
   HISTORY_PREFIX: 'overload_ai_history_v2_',
   STATS_PREFIX: 'overload_ai_stats_v2_',
   ACTIVE_WORKOUT_PREFIX: 'overload_ai_active_workout_v2_'
@@ -104,10 +104,21 @@ export const storageService = {
     const pid = profileId || this.getActiveProfileId();
     try {
       const data = localStorage.getItem(STORAGE_KEYS.ROUTINES_PREFIX + pid);
-      if (!data) return [];
-      return JSON.parse(data);
+      if (!data) {
+        if (pid === 'profile-nico') {
+          this.saveRoutines(INITIAL_ROUTINES, pid);
+          return INITIAL_ROUTINES;
+        }
+        return [];
+      }
+      const parsed = JSON.parse(data);
+      if (pid === 'profile-nico' && Array.isArray(parsed) && parsed.length === 0) {
+        this.saveRoutines(INITIAL_ROUTINES, pid);
+        return INITIAL_ROUTINES;
+      }
+      return parsed;
     } catch (e) {
-      return [];
+      return pid === 'profile-nico' ? INITIAL_ROUTINES : [];
     }
   },
 
