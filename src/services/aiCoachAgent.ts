@@ -18,12 +18,38 @@ export interface CoachContext {
 
 export const aiCoachAgent = {
   async getResponse(userMessage: string, context: CoachContext): Promise<string> {
-    const text = userMessage.toLowerCase().trim();
+    const rawText = userMessage.trim();
+    const text = rawText.toLowerCase();
     const { profileName, activeWorkout, exercises, routines } = context;
 
-    await new Promise(r => setTimeout(r, 450));
+    // Pequeña latencia natural de procesamiento (300ms)
+    await new Promise(r => setTimeout(r, 300));
 
-    // 1. REEMPLAZO DE EJERCICIOS (MÁQUINA OCUPADA O MOLESTIA)
+    // 1. SALUDOS NATURALES
+    if (
+      /^(hola|buenas|buen dia|buenos dias|buenas tardes|buenas noches|hey|que tal|qué tal|que mas|qué más|epale|saludos|hi|hello)/i.test(text) ||
+      text === 'hola' || text === 'buenas' || text === 'hey' || text === 'que mas' || text === 'qué más'
+    ) {
+      if (activeWorkout) {
+        return "¡Hola, " + profileName + "! 💪 Te veo activo ahora mismo en tu rutina **" + activeWorkout.routineName + "**.\n\n¿Cómo va esa sesión? Cuéntame si necesitas el reemplazo de alguna máquina ocupada, si tienes fatiga o si quieres saber con qué peso tirar en tu próxima serie.";
+      }
+      return "¡Hola, " + profileName + "! ⚡ ¿Todo listo para romperla hoy en el gimnasio?\n\nCuéntame qué rutina tienes pensada para hoy o en qué te puedo dar una mano: reemplazo de ejercicios si hay máquinas llenas, dudas con la técnica, descansos o cómo meterle sobrecarga a tus series.";
+    }
+
+    // 2. CÓMO ESTÁS / QUÉ TAL
+    if (text.includes('como estas') || text.includes('cómo estás') || text.includes('como te va') || text.includes('cómo te va') || text.includes('todo bien')) {
+      return "¡Al 100% y listo para ayudarte a meterle sobrecarga inteligente a esos entrenamientos! ⚡ ¿Qué te gustaría consultar o ajustar hoy, " + profileName + "?";
+    }
+
+    // 3. AGRADECIMIENTOS Y DESPEDIDAS
+    if (
+      text.includes('gracias') || text.includes('muchas gracias') || text === 'listo' || text === 'vale' || 
+      text === 'dale' || text === 'ok' || text === 'perfecto' || text.includes('chao') || text.includes('voy a entrenar')
+    ) {
+      return "¡Con toda la energía, " + profileName + "! Dale duro a esa sesión, cuida la técnica en cada repetición y no olvides registrar tus pesos. ¡A romperla! 💥";
+    }
+
+    // 4. REEMPLAZO DE EJERCICIOS (MÁQUINA OCUPADA O MOLESTIA)
     if (
       text.includes('ocupad') || 
       text.includes('reemplaz') || 
@@ -63,27 +89,37 @@ export const aiCoachAgent = {
       return "¡Claro! Dime qué ejercicio o máquina tienes ocupada y te daré el sustituto biomecánico exacto con mancuernas o poleas.";
     }
 
-    // 2. FATIGA / CANSANCIO / SUEÑO
-    if (text.includes('fatig') || text.includes('cansad') || text.includes('dormi') || text.includes('energia') || text.includes('energía')) {
+    // 5. FATIGA / CANSANCIO / SUEÑO
+    if (text.includes('fatig') || text.includes('cansad') || text.includes('dormi') || text.includes('energia') || text.includes('energía') || text.includes('agotad')) {
       return "Buen punto para autorregular, " + profileName + ". Cuando el cuerpo viene fatigado:\n\n1. **Aplica RIR 2-3:** No vayas al fallo hoy. Deja 2 repeticiones en el tanque en cada serie.\n2. **Mantén el peso, reduce 1 serie:** Si te tocan 3 series, haz solo 2 de máxima calidad.\n3. **Descanso +30s:** Sube los descansos entre series a 90-120s para que baje bien el pulso.\n\n*Recuerda:* La consistencia de sumar volumen moderado supera por mucho a forzar un récord en un mal día de recuperación.";
     }
 
-    // 3. SOBRECARGA PROGRESIVA (CÓMO SUBIR)
-    if (text.includes('sobrecarga') || text.includes('subir') || text.includes('cuanto') || text.includes('cuánto') || text.includes('progreso')) {
+    // 6. SOBRECARGA PROGRESIVA (CÓMO SUBIR PESO / REPETICIONES)
+    if (text.includes('sobrecarga') || text.includes('subir') || text.includes('cuanto peso') || text.includes('cuánto peso') || text.includes('progreso')) {
       return "Nuestra estrategia en esta app es la **Doble Progresión Científica**:\n\n1. **Paso 1 (Reps):** Mantén el mismo peso hasta que alcances el tope de repeticiones en todas las series (ej. si tu rango es 8-10, lucha hasta sacar 10 en todas).\n2. **Paso 2 (Peso):** En cuanto logres el tope de reps, en la siguiente sesión la IA te ordenará subir **+2 a +2.5 kg** y volver al piso (8 reps).\n\nNunca subas peso si tu técnica se degrada o sacrificas el rango de movimiento.";
     }
 
-    // 4. COMBINACIÓN CON RUNNING (21K / CARRERA)
+    // 7. CALENTAMIENTO / APROXIMACIÓN
+    if (text.includes('calent') || text.includes('aproximaci') || text.includes('warm up')) {
+      return "Un protocolo de calentamiento efectivo toma solo 5 a 7 minutos:\n\n1. **Movilidad articular (2 min):** Círculos con brazos, rotaciones de hombro y movilidad de cadera.\n2. **Series de aproximación:**\n   • Serie 1: 50% de tu peso de trabajo × 8 reps (movimiento suave).\n   • Serie 2: 70% de tu peso de trabajo × 4 reps (despertar el sistema nervioso sin fatiga).\n3. **¡A tu primera serie efectiva!** No quemes glucógeno haciendo series largas de calentamiento.";
+    }
+
+    // 8. TIEMPOS DE DESCANSO
+    if (text.includes('descans') || text.includes('tiempo entre series')) {
+      return "En tu app el cronómetro ya está sincronizado por ejercicio:\n\n• **90 a 120s:** En ejercicios compuestos pesados (Press Inclinado, Sentadilla Hack, Remo con barra) para reponer el fosfágeno celular (ATP).\n• **60 a 75s:** En ejercicios de aislamiento y bombeo (Laterales, Peck Deck, Extensiones de Tríceps, Curls).\n\nSi sientes que el pulso no ha bajado, dale a **+30s** en el cronómetro.";
+    }
+
+    // 9. COMBINACIÓN CON RUNNING (21K / CARRERA)
     if (text.includes('correr') || text.includes('running') || text.includes('21k') || text.includes('maraton') || text.includes('maratón')) {
       return "Para tu perfil de atleta híbrido (fuerza + 21K):\n\n* **Separa los estímulos:** Deja mínimo 6 a 8 horas entre un entreno de pierna y una tirada de carrera.\n* **Prioriza gemelos e isquios:** El peso muerto rumano y las elevaciones de talones fortalecen el tendón de Aquiles para evitar fascitis y periostitis.\n* **En semana de descarga de carrera:** Mantén las cargas de pierna estables pero no busques fallo muscular absoluto.";
     }
 
-    // 5. DOLOR / MOLESTIA ARTICULAR (HOMBRO, RODILLA, CODO)
+    // 10. DOLOR / MOLESTIA ARTICULAR (HOMBRO, RODILLA, CODO)
     if (text.includes('dolor') || text.includes('molest') || text.includes('hombro') || text.includes('rodilla') || text.includes('codo')) {
       return "⚠️ **Cuidado con las articulaciones**, " + profileName + ":\n\n* **Si es en hombro:** Prueba agarre neutro con mancuernas (palmas enfrentadas) a 30° de inclinación.\n* **Si es en rodilla:** Cambia a zancadas hacia atrás (*Reverse Lunges*) para quitar cizalla en la rótula.\n* **Si es en codo:** Evita el press francés y pásate a extensiones con polea usando cuerda suave.\n\nSi el dolor es punzante, detén ese ejercicio hoy mismo.";
     }
 
-    // 6. PREGUNTA SOBRE RUTINAS O ESTADO DE HOY
+    // 11. RUTINAS
     if (text.includes('rutina') || text.includes('toca') || text.includes('hoy') || text.includes('entreno')) {
       if (activeWorkout) {
         return "Actualmente tienes en curso la rutina **" + activeWorkout.routineName + "**, con " + activeWorkout.exercises.length + " ejercicios registrados y un volumen acumulado de " + activeWorkout.totalVolumeKg + " kg.\n\n¡Sigue enfocado serie a serie y activa el cronómetro de descanso!";
@@ -91,6 +127,7 @@ export const aiCoachAgent = {
       return "Tienes 4 rutinas optimizadas cargadas en tu perfil:\n1. **Pecho y Espalda** (18 series)\n2. **Brazo y Hombro** (21 series)\n3. **Pierna Gym Completo** (19 series)\n4. **Pierna Solo Mancuernas** (16 series)\n\n¿Cuál de ellas vas a iniciar hoy?";
     }
 
-    return "¡Excelente pregunta, " + profileName + "! Para optimizar tu progreso hoy:\n\n• **Fase excéntrica controlada:** Baja el peso en 2 a 3 segundos para maximizar hipertrofia.\n• **Registra cada serie:** Al anotar tus kilos y repeticiones, la IA calculará tu meta exacta para la próxima sesión.\n• **Descanso adecuado:** Respeta los 60s a 90s del cronómetro para resintetizar ATP.\n\n¿Necesitas que busquemos una alternativa a algún ejercicio o tienes dudas con una técnica?";
+    // 12. RESPUESTA NATURAL INTELIGENTE (NO CANNED)
+    return "Te entiendo perfectamente, " + profileName + ". ¿Tienes alguna duda puntual con alguno de tus ejercicios de hoy, quieres saber con qué peso arrancar o necesitas cambiar alguna máquina ocupada?\n\nDime exactamente qué ejercicio estás haciendo y lo resolvemos en un segundo.";
   }
 };

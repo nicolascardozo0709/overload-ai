@@ -23,7 +23,7 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
     {
       id: 'welcome',
       sender: 'assistant',
-      text: '¡Hola ' + (activeProfile?.name || 'Nico') + '! ⚡ Soy tu **Coach Virtual de Sobrecarga e IA**.\n\nEstoy aquí para ayudarte durante tus entrenamientos en tiempo real: si una máquina está ocupada, si tienes fatiga, dudas con la técnica de tus ejercicios o quieres saber cómo progresar en tus series de hoy.',
+      text: '¡Hola ' + (activeProfile?.name || 'Nico') + '! ⚡ Soy tu **Coach Virtual de Sobrecarga e IA**.\n\nEstoy aquí para ayudarte en tiempo real durante tu entrenamiento. Pregúntame lo que quieras o toca uno de los botones rápidos de abajo.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -32,7 +32,6 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
   const [isTyping, setIsTyping] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll instantáneo sin animación para evitar freeze en iOS Safari
   const scrollToBottom = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
@@ -97,22 +96,22 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-[100] bg-black/80 flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={(e) => {
-        // Cerrar tocando fuera del modal (backdrop)
+        // Cerrar tocando el fondo exterior
         if (e.target === e.currentTarget) {
           onClose();
         }
       }}
     >
       <div 
-        className="w-full max-w-lg bg-[#141416] border-t sm:border border-white/10 rounded-t-3xl sm:rounded-3xl flex flex-col h-[85vh] sm:h-[620px] shadow-2xl overflow-hidden"
+        className="w-full max-w-lg bg-[#141416] border-t sm:border border-white/10 rounded-t-3xl sm:rounded-3xl flex flex-col h-[82vh] max-h-[90dvh] sm:h-[620px] shadow-2xl overflow-hidden relative z-[101]"
         style={{ touchAction: 'pan-y' }}
       >
         
-        {/* Grab Handle para deslizar en iPhone */}
-        <div className="w-full pt-2 pb-1 flex justify-center cursor-pointer" onClick={onClose}>
-          <div className="w-10 h-1 bg-white/25 rounded-full hover:bg-white/40 transition" />
+        {/* Grab Handle para deslizar o cerrar */}
+        <div className="w-full pt-2.5 pb-1 flex justify-center cursor-pointer" onClick={onClose}>
+          <div className="w-12 h-1 bg-white/20 hover:bg-white/40 rounded-full transition" />
         </div>
 
         {/* Header */}
@@ -146,11 +145,15 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
           </button>
         </div>
 
-        {/* Message Area con scroll táctil optimizado para iOS */}
+        {/* Message Area con scroll táctil sin barra fea */}
         <div 
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0E0E10]"
-          style={{ WebkitOverflowScrolling: 'touch' }}
+          className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0E0E10] no-scrollbar"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch' 
+          }}
         >
           {messages.map((m) => {
             const isUser = m.sender === 'user';
@@ -186,8 +189,11 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
           )}
         </div>
 
-        {/* Quick Suggestion Chips */}
-        <div className="px-3 py-2 bg-[#141416] border-t border-white/5 overflow-x-auto flex gap-2">
+        {/* Quick Suggestion Chips (limpio, sin scrollbar track) */}
+        <div 
+          className="px-3 py-2.5 bg-[#141416] border-t border-white/5 overflow-x-auto no-scrollbar flex gap-2 shrink-0"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
           {QUICK_CHIPS.map((chip, idx) => (
             <button
               key={idx}
@@ -200,8 +206,8 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
           ))}
         </div>
 
-        {/* Input Bar adaptada a Safe Area de iPhone */}
-        <div className="p-3 bg-[#1A1A1E] border-t border-white/10 pb-[max(12px,env(safe-area-inset-bottom))]">
+        {/* Input Bar 100% visible, bien acolchada sobre safe-area */}
+        <div className="p-3 bg-[#1A1A1E] border-t border-white/10 pb-[max(18px,env(safe-area-inset-bottom,18px))] shrink-0">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -211,16 +217,16 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
           >
             <input
               type="text"
-              placeholder="Pregúntale al Coach IA..."
+              placeholder="Escribe tu mensaje al Coach IA..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              style={{ fontSize: '16px' }} // Previene zoom automático en iPhone Safari
-              className="flex-1 bg-[#101012] border border-white/10 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition"
+              style={{ fontSize: '16px' }}
+              className="flex-1 bg-[#101012] border border-white/15 rounded-2xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition"
             />
             <button
               type="submit"
               disabled={!inputText.trim() || isTyping}
-              className="w-10 h-10 rounded-xl bg-cyan-400 active:bg-cyan-300 disabled:opacity-40 text-black flex items-center justify-center font-black transition active:scale-95 shrink-0 shadow-md shadow-cyan-400/20"
+              className="w-10 h-10 rounded-2xl bg-cyan-400 active:bg-cyan-300 disabled:opacity-40 text-black flex items-center justify-center font-black transition active:scale-95 shrink-0 shadow-md shadow-cyan-400/20"
               aria-label="Enviar"
             >
               <Send className="w-4 h-4" />
