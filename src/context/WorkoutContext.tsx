@@ -6,7 +6,8 @@ import {
   WorkoutSession, 
   UserStats, 
   ExerciseSessionLog, 
-  SetLog 
+  SetLog,
+  UserProfile 
 } from '../types';
 import { storageService } from '../services/storageService';
 import { calculateOverloadScore, calculateStreak } from '../services/progressiveOverloadAI';
@@ -397,6 +398,11 @@ export const WorkoutProvider: React.FC<{ children: React.ReactNode }> = ({ child
       stats,
       activeWorkout,
       restTimer,
+      profiles,
+      activeProfile,
+      switchProfile,
+      createNewProfile,
+      updateProfileName,
       addExercise,
       addRoutine,
       updateRoutine,

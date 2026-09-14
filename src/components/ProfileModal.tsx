@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useWorkout } from '../context/WorkoutContext';
 import { User, Plus, Check, X, Sparkles, Heart } from 'lucide-react';
 
@@ -66,8 +66,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
             Seleccionar Perfil Activo
           </span>
           <div className="grid grid-cols-1 gap-2">
-            {profiles.map(p => {
-              const isActive = p.id === activeProfile.id;
+            {profiles?.map(p => {
+              const isActive = p.id === activeProfile?.id;
               return (
                 <div
                   key={p.id}

@@ -44,8 +44,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateTab }) => {
             onClick={() => setShowProfileModal(true)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#18181B] border border-white/10 hover:border-cyan-400/40 active:scale-95 transition text-[11px] font-bold text-slate-300 shadow-sm mb-1"
           >
-            <span className="text-sm">{activeProfile.avatarEmoji}</span>
-            <span className="text-white font-black">{activeProfile.name}</span>
+            <span className="text-sm">{activeProfile?.avatarEmoji || '⚡'}</span>
+            <span className="text-white font-black">{activeProfile?.name || 'Nico'}</span>
             <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
           </button>
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
