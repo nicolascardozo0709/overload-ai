@@ -17,9 +17,10 @@ const QUICK_CHIPS = [
 ];
 
 const AVAILABLE_MODELS = [
-  { id: 'gemini-2.0-flash', label: '⚡ Gemini 2.0 Flash (Más reciente y veloz)' },
-  { id: 'gemini-1.5-pro', label: '🧠 Gemini 1.5 Pro (Máximo razonamiento - Pro)' },
-  { id: 'gemini-1.5-flash', label: '🔹 Gemini 1.5 Flash (Ligero)' }
+  { id: 'gemini-3.8-flash-high', label: '⚡ Gemini 3.8 Flash High (Modelo actual de Antigravity)' },
+  { id: 'gemini-3.5-flash', label: '🚀 Gemini 3.5 Flash' },
+  { id: 'gemini-2.0-flash', label: '✨ Gemini 2.0 Flash' },
+  { id: 'gemini-1.5-pro', label: '🧠 Gemini Pro' }
 ];
 
 export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onClose }) => {

@@ -34,7 +34,7 @@ export const aiCoachAgent = {
   },
 
   getModel(): string {
-    return localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-2.0-flash';
+    return localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-3.8-flash-high';
   },
 
   setModel(model: string): void {
@@ -42,7 +42,7 @@ export const aiCoachAgent = {
   },
 
   /**
-   * Llama a la API de Gemini (2.0 Flash por defecto, con fallback a 1.5)
+   * Llama a la API de Gemini (3.8 Flash High por defecto, con fallback inteligente)
    */
   async callGeminiAPI(userMessage: string, context: CoachContext, apiKey: string): Promise<string | null> {
     try {
@@ -51,17 +51,18 @@ export const aiCoachAgent = {
 
       const systemPrompt = `Eres Coach Antigauch, un entrenador personal de élite, experto en sobrecarga progresiva, biomecánica hipertrófica y preparación para atletas híbridos (fuerza + 21K running).
 Estás chateando en tiempo real con ${profileName} a través de su aplicación móvil Overload AI.
-Háblale de forma cercana, motivadora, natural, en español (colombiano respetuoso pero con confianza de gimnasio: parce/campeón/máquina si encaja, pero conciso).
-Contexto del usuario:
-- Perfil: ${profileName}
-- Racha actual: ${stats.streakDays} días
-- Rutina activa ahora mismo: ${activeWorkout ? activeWorkout.routineName + ' (' + activeWorkout.exercises.length + ' ejercicios registrados)' : 'Ninguna activa en este momento'}
-- Rutinas en su app: Pecho y Espalda (18 series), Brazo y Hombro (21 series), Pierna Gimnasio Completo (19 series), Pierna Solo Mancuernas (16 series).
+Tu tono es motivador, directo, científico pero muy cercano y amigable (hablas en español colombiano con estilo de gimnasio: "parcero", "de una", "con toda", "vamos a darle").
+
+Contexto actual del atleta:
+- Perfil activo: ${profileName}
+- Rutina en curso: ${activeWorkout ? activeWorkout.routineName : 'Ninguna activa en este momento'}
+- Ejercicios de la rutina: ${activeWorkout ? activeWorkout.exercises.length : 0}
+- Historial y Rachas: ${stats ? stats.streakWeeks + ' semanas seguidas' : 'Iniciando'}
 
 Directrices:
-1. Si solo te saluda ("hola", "cómo vas", "qué más"), respóndele de forma natural, cálida y directa, preguntándole cómo va la jornada o si ya está en el gimnasio.
-2. Si te pide un reemplazo porque una máquina está ocupada, dale 2 alternativas biomecánicas exactas con mancuernas o poleas y un tip técnico clave.
-3. Si te pregunta por fatiga, sobrecarga o pesos, sé breve, práctico y con base científica (RIR, volumen, doble progresión).
+1. Si pregunta por máquina ocupada, dale variantes biomecánicas idénticas (mancuerna o polea).
+2. Si pregunta por sobrecarga, dile cómo aplicar doble progresión (llegar al tope de reps antes de subir kilos).
+3. Si está fatigado o corre 21K, recomienda RIR 2-3 y descansos mayores.
 4. No des discursos gigantes a menos que te pida una explicación detallada. Sé directo y útil.`;
 
       const contents = [
@@ -71,31 +72,35 @@ Directrices:
         }
       ];
 
-      // Intentar primero con el modelo seleccionado (ej. gemini-2.0-flash)
-      let url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
-      let res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents })
-      });
+      // Intentar primero con el modelo seleccionado (ej. gemini-3.8-flash-high)
+      const modelsToTry = [
+        selectedModel,
+        'gemini-2.0-flash',
+        'gemini-1.5-flash'
+      ].filter((m, idx, arr) => arr.indexOf(m) === idx);
 
-      // Si falla (por ejemplo si 2.0 no está habilitado en esa key específica), intentar con 1.5-flash
-      if (!res.ok && selectedModel !== 'gemini-1.5-flash') {
-        console.warn('Fallo con ' + selectedModel + ', intentando fallback a gemini-1.5-flash...');
-        url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents })
-        });
+      let data: any = null;
+      for (const m of modelsToTry) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents })
+          });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          }
+        } catch (e) {
+          // Continue to next model in cascade
+        }
       }
 
-      if (!res.ok) {
-        console.warn('Gemini API returned status:', res.status);
+      if (!data) {
         return null;
       }
 
-      const data = await res.json();
       const generated = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       return generated || null;
     } catch (e) {
