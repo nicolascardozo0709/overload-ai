@@ -1,0 +1,27 @@
+{
+  "short_name": "Overload AI",
+  "name": "Overload AI • Sobrecarga Progresiva",
+  "description": "App para iPhone de control de rutinas, sobrecarga progresiva inteligente, rachas y gráficas con IA.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#09090B",
+  "theme_color": "#09090B",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
+}
