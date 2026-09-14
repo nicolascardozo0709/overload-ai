@@ -18,7 +18,8 @@ const QUICK_CHIPS = [
 
 const AVAILABLE_MODELS = [
   { id: 'gemini-2.0-flash', label: '⚡ Gemini 2.0 Flash (Más reciente y veloz)' },
-  { id: 'gemini-1.5-flash', label: '🔹 Gemini 1.5 Flash (Estable)' }
+  { id: 'gemini-1.5-pro', label: '🧠 Gemini 1.5 Pro (Máximo razonamiento - Pro)' },
+  { id: 'gemini-1.5-flash', label: '🔹 Gemini 1.5 Flash (Ligero)' }
 ];
 
 export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onClose }) => {
