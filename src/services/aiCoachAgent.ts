@@ -17,27 +17,37 @@ export interface CoachContext {
   chatHistory?: ChatMessage[];
 }
 
-const STORAGE_KEY_GEMINI = 'overload_ai_gemini_api_key';
+const STORAGE_KEY_API_KEY = 'overload_ai_gemini_api_key';
+const STORAGE_KEY_MODEL = 'overload_ai_ai_model';
 
 export const aiCoachAgent = {
   getApiKey(): string {
-    return localStorage.getItem(STORAGE_KEY_GEMINI) || '';
+    return localStorage.getItem(STORAGE_KEY_API_KEY) || '';
   },
 
   setApiKey(key: string): void {
     if (key.trim()) {
-      localStorage.setItem(STORAGE_KEY_GEMINI, key.trim());
+      localStorage.setItem(STORAGE_KEY_API_KEY, key.trim());
     } else {
-      localStorage.removeItem(STORAGE_KEY_GEMINI);
+      localStorage.removeItem(STORAGE_KEY_API_KEY);
     }
   },
 
+  getModel(): string {
+    return localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-2.0-flash';
+  },
+
+  setModel(model: string): void {
+    localStorage.setItem(STORAGE_KEY_MODEL, model);
+  },
+
   /**
-   * Llama a la API de Gemini si hay una API Key configurada
+   * Llama a la API de Gemini (2.0 Flash por defecto, con fallback a 1.5)
    */
   async callGeminiAPI(userMessage: string, context: CoachContext, apiKey: string): Promise<string | null> {
     try {
       const { profileName, activeWorkout, routines, stats } = context;
+      const selectedModel = this.getModel();
 
       const systemPrompt = `Eres Coach Antigauch, un entrenador personal de élite, experto en sobrecarga progresiva, biomecánica hipertrófica y preparación para atletas híbridos (fuerza + 21K running).
 Estás chateando en tiempo real con ${profileName} a través de su aplicación móvil Overload AI.
@@ -61,12 +71,24 @@ Directrices:
         }
       ];
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-      const res = await fetch(url, {
+      // Intentar primero con el modelo seleccionado (ej. gemini-2.0-flash)
+      let url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+      let res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents })
       });
+
+      // Si falla (por ejemplo si 2.0 no está habilitado en esa key específica), intentar con 1.5-flash
+      if (!res.ok && selectedModel !== 'gemini-1.5-flash') {
+        console.warn('Fallo con ' + selectedModel + ', intentando fallback a gemini-1.5-flash...');
+        url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents })
+        });
+      }
 
       if (!res.ok) {
         console.warn('Gemini API returned status:', res.status);

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useWorkout } from '../context/WorkoutContext';
 import { aiCoachAgent, ChatMessage } from '../services/aiCoachAgent';
-import { Sparkles, X, Send, Key, Check, ExternalLink } from 'lucide-react';
+import { Sparkles, X, Send, Key, Check, ExternalLink, Cpu } from 'lucide-react';
 
 interface AICoachChatModalProps {
   isOpen: boolean;
@@ -16,10 +16,16 @@ const QUICK_CHIPS = [
   { label: '🩹 Molestia articular', prompt: 'Tengo una ligera molestia articular, ¿qué precauciones tomo?' }
 ];
 
+const AVAILABLE_MODELS = [
+  { id: 'gemini-2.0-flash', label: '⚡ Gemini 2.0 Flash (Más reciente y veloz)' },
+  { id: 'gemini-1.5-flash', label: '🔹 Gemini 1.5 Flash (Estable)' }
+];
+
 export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onClose }) => {
   const { activeProfile, activeWorkout, workoutHistory, routines, exercises, stats } = useWorkout();
   
   const [apiKey, setApiKey] = useState(aiCoachAgent.getApiKey());
+  const [selectedModel, setSelectedModel] = useState(aiCoachAgent.getModel());
   const [showKeySettings, setShowKeySettings] = useState(false);
   const [inputKey, setInputKey] = useState(apiKey);
   const [keySavedMessage, setKeySavedMessage] = useState(false);
@@ -54,6 +60,7 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
   const handleSaveKey = (e: React.FormEvent) => {
     e.preventDefault();
     aiCoachAgent.setApiKey(inputKey);
+    aiCoachAgent.setModel(selectedModel);
     setApiKey(inputKey.trim());
     setKeySavedMessage(true);
     setTimeout(() => {
@@ -144,7 +151,7 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
                 <h3 className="text-sm font-black text-white">Coach Virtual IA</h3>
                 {apiKey ? (
                   <span className="text-[9px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                    <Sparkles className="w-2.5 h-2.5" /> Gemini Flash
+                    <Sparkles className="w-2.5 h-2.5" /> {selectedModel.replace('gemini-', 'Gemini ').replace('-', ' ')}
                   </span>
                 ) : (
                   <span className="text-[9px] uppercase font-black px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
@@ -163,9 +170,9 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
               onClick={() => setShowKeySettings(!showKeySettings)}
               className={'w-8 h-8 rounded-full flex items-center justify-center transition text-xs ' + 
                 (apiKey ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/10 text-slate-300 hover:text-white')}
-              title="Configurar Gemini API"
+              title="Configurar Modelo y API"
             >
-              <Key className="w-3.5 h-3.5" />
+              <Cpu className="w-3.5 h-3.5" />
             </button>
 
             <button
@@ -180,41 +187,61 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
 
         {/* Panel de Configuración Gemini (Desplegable) */}
         {showKeySettings && (
-          <div className="p-3.5 bg-[#18181C] border-b border-white/10 animate-fadeIn text-xs space-y-2.5">
+          <div className="p-3.5 bg-[#18181C] border-b border-white/10 animate-fadeIn text-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-black text-white flex items-center gap-1.5">
-                <Key className="w-3.5 h-3.5 text-cyan-400" /> Conectar Gemini AI (Opcional & Gratis)
+                <Cpu className="w-3.5 h-3.5 text-cyan-400" /> Modelo de Inteligencia Artificial
               </span>
               <button onClick={() => setShowKeySettings(false)} className="text-slate-400 hover:text-white">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Si quieres que el chatbot funcione con el modelo de lenguaje de Google Gemini Flash al 100%, puedes pegar tu API Key gratuita aquí:
-            </p>
-            <form onSubmit={handleSaveKey} className="flex gap-2">
-              <input
-                type="password"
-                placeholder="AIzaSy..."
-                value={inputKey}
-                onChange={e => setInputKey(e.target.value)}
-                className="flex-1 bg-[#101012] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
-              />
-              <button
-                type="submit"
-                className="px-3.5 py-2 rounded-xl bg-cyan-400 text-black font-black text-xs hover:bg-cyan-300 transition"
+
+            <div>
+              <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Versión del Modelo</label>
+              <select
+                value={selectedModel}
+                onChange={e => {
+                  setSelectedModel(e.target.value);
+                  aiCoachAgent.setModel(e.target.value);
+                }}
+                className="w-full bg-[#101012] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
               >
-                {keySavedMessage ? '¡Guardada!' : 'Guardar'}
-              </button>
-            </form>
-            <div className="flex items-center justify-between text-[10px] text-slate-400">
+                {AVAILABLE_MODELS.map(m => (
+                  <option key={m.id} value={m.id} className="bg-[#18181C] text-white">
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">API Key de Google (Gratis)</label>
+              <form onSubmit={handleSaveKey} className="flex gap-2">
+                <input
+                  type="password"
+                  placeholder="AIzaSy..."
+                  value={inputKey}
+                  onChange={e => setInputKey(e.target.value)}
+                  className="flex-1 bg-[#101012] border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                />
+                <button
+                  type="submit"
+                  className="px-3.5 py-2 rounded-xl bg-cyan-400 text-black font-black text-xs hover:bg-cyan-300 transition"
+                >
+                  {keySavedMessage ? '¡Listo!' : 'Guardar'}
+                </button>
+              </form>
+            </div>
+
+            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
               <a 
                 href="https://aistudio.google.com/apikey" 
                 target="_blank" 
                 rel="noreferrer"
                 className="text-cyan-400 hover:underline flex items-center gap-1"
               >
-                Obtener API Key gratis en Google AI Studio <ExternalLink className="w-2.5 h-2.5" />
+                Obtener clave gratis en Google AI Studio <ExternalLink className="w-2.5 h-2.5" />
               </a>
               {apiKey && (
                 <button
@@ -272,7 +299,7 @@ export const AICoachChatModal: React.FC<AICoachChatModalProps> = ({ isOpen, onCl
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce"></span>
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.2s]"></span>
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.4s]"></span>
-              <span className="text-[11px] text-slate-400 font-bold ml-1">Escribiendo...</span>
+              <span className="text-[11px] text-slate-400 font-bold ml-1">Consultando {selectedModel.includes('2.0') ? 'Gemini 2.0...' : 'Coach IA...'}</span>
             </div>
           )}
         </div>
